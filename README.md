@@ -21,7 +21,7 @@ CarTrading is a Node.js-based API for a car trading platform, supporting user au
 ##Setup
 Clone the repository:
 
--`git clone https://github.com/Kuvernoori/Deployment`
+-`git clone https://github.com/snkmqn/CarTrading`
 -`cd CarTrading`
 ##Install dependencies:
 
