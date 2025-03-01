@@ -30,7 +30,7 @@ Clone the repository:
 
 `MONGO_URI=mongodb://localhost:27017/cartrading`
 `JWT_SECRET=your_secret_key`
-`PORT=5000`
+`PORT=3000`
 ##Start the server:
 
 `node index.js`
