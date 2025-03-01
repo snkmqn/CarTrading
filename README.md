@@ -18,20 +18,20 @@ CarTrading is a Node.js-based API for a car trading platform, supporting user au
 
 -MongoDB
 
-##Setup
+## Setup
 Clone the repository:
 
 -`git clone https://github.com/snkmqn/CarTrading`
 -`cd CarTrading`
-##Install dependencies:
+## Install dependencies:
 
 -`npm install`
-##Create a .env file in the root directory and configure the following:
+## Create a .env file in the root directory and configure the following:
 
 `MONGO_URI=mongodb://localhost:27017/cartrading`
 `JWT_SECRET=your_secret_key`
 `PORT=3000`
-##Start the server:
+## Start the server:
 
 `node index.js`
 
