@@ -1,7 +1,7 @@
-#CarTrading API
+# CarTrading API
 CarTrading is a Node.js-based API for a car trading platform, supporting user authentication, car listing management, and search functionalities.
 
-##Features
+## Features
 -User authentication (JWT-based)
 
 -Car listing creation and management
@@ -12,7 +12,7 @@ CarTrading is a Node.js-based API for a car trading platform, supporting user au
 
 -Review system
 
-##Installation
+## Installation
 -Prerequisites
 -Node.js (>= 14.x)
 
