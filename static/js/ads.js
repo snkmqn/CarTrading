@@ -1,8 +1,9 @@
 document.addEventListener("DOMContentLoaded", async function () {
-    async function getUserUsername() {
+    const getUserUsername = async () => {
         try {
             const token = localStorage.getItem("token");
             if (!token) throw new Error("User is not authenticated");
+
             const response = await fetch("http://localhost:3000/api/user", {
                 method: "GET",
                 headers: {
@@ -10,42 +11,34 @@ document.addEventListener("DOMContentLoaded", async function () {
                     "Content-Type": "application/json"
                 }
             });
+
             if (!response.ok) throw new Error("Error fetching user data");
-            const data = await response.json();
-            return data.username;
+            return (await response.json()).username;
         } catch (error) {
             console.error("Error retrieving user username:", error);
             return null;
         }
-    }
+    };
 
-    function getAds() {
-        return JSON.parse(localStorage.getItem("my_ads")) || {};
-    }
-
-    function saveAds(ads) {
-        localStorage.setItem("my_ads", JSON.stringify(ads));
-    }
+    const getAds = () => JSON.parse(localStorage.getItem("my_ads")) || {};
+    const saveAds = ads => localStorage.setItem("my_ads", JSON.stringify(ads));
 
     let editingAdId = null;
 
     async function saveAd() {
-        let title = document.getElementById("title")?.value.trim();
-        let year = document.getElementById("year")?.value.trim();
-        let color = document.getElementById("color")?.value.trim();
-        let description = document.getElementById("description")?.value.trim();
-        let imageFile = document.getElementById("image")?.files[0];
+        const title = document.getElementById("title")?.value.trim();
+        const year = document.getElementById("year")?.value.trim();
+        const color = document.getElementById("color")?.value.trim();
+        const description = document.getElementById("description")?.value.trim();
+        const imageFile = document.getElementById("image")?.files[0];
 
         if (!title || !year || !color || !description || !imageFile) {
             alert("Please fill in all fields and upload an image.");
             return;
         }
 
-        let username = await getUserUsername();
-        if (!username) {
-            alert("Error retrieving user information.");
-            return;
-        }
+        const username = await getUserUsername();
+        if (!username) alert("Error retrieving user information.");
 
         let ads = getAds();
         if (!ads[username]) ads[username] = [];
@@ -60,7 +53,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                     alert("Error: Ad not found.");
                     return;
                 }
-                Object.assign(ad, { name: title, year, color, description, image: imageData });
+                Object.assign(ad, {name: title, year, color, description, image: imageData});
                 editingAdId = null;
             } else {
                 ads[username].push({
@@ -75,45 +68,53 @@ document.addEventListener("DOMContentLoaded", async function () {
                 });
             }
 
+            document.getElementById("title").value = "";
+            document.getElementById("year").value = "";
+            document.getElementById("color").value = "";
+            document.getElementById("description").value = "";
+            document.getElementById("image").value = "";
+
             saveAds(ads);
             displayAds();
-            closePopup();
+            togglePopup(false);
         };
         reader.readAsDataURL(imageFile);
     }
 
     async function displayAds() {
-        let adsList = document.getElementById("ads-list");
+        const adsList = document.getElementById("ads-list");
         adsList.innerHTML = "";
 
-        let username = await getUserUsername();
-        let ads = getAds();
-        let userAds = ads[username] || [];
+        const username = await getUserUsername();
+        const ads = getAds();
+        const userAds = ads[username] || [];
 
         if (!userAds.length) {
             adsList.innerHTML = '<p class="no-results">You have no ads yet.</p>';
             return;
         }
 
-        adsList.innerHTML = userAds.map(car => `
-            <div class="car-item" data-id="${car.id}">
-                <img src="${car.image || '/images/default_car.jpg'}" alt="${car.name}">
-                <h3>${car.name}</h3>
-                <p><strong>Year:</strong> ${car.year}</p>
-                <p><strong>Color:</strong> ${car.color}</p>
-                <p><strong>Seller:</strong> <a href="#">${car.seller || "Unknown"}</a></p>
-                <p><strong>Rating:</strong> ⭐ ${car.rating}</p>
-                <p>${car.description}</p>
-                <button class="edit-button" onclick="editAd(${car.id})">Edit</button>
-                <button class="delete-button" onclick="deleteAd(${car.id})">Delete</button>
-            </div>
-        `).join('');
+        adsList.innerHTML = userAds.length
+            ? userAds.map(car => `
+                <div class="car-item" data-id="${car.id}">
+                    <img src="${car.image}" alt="${car.name}">
+                    <h3>${car.name}</h3>
+                    <p><strong>Year:</strong> ${car.year}</p>
+                    <p><strong>Color:</strong> ${car.color}</p>
+                    <p><strong>Seller:</strong> <a href="/profile">${car.seller || "Unknown"}</a></p>
+                    <p><strong>Rating:</strong> ⭐ ${car.rating}</p>
+                    <p>${car.description}</p>
+                    <button class="edit-button" onclick="editAd(${car.id})">Edit</button>
+                    <button class="delete-button" onclick="deleteAd(${car.id})">Delete</button>
+                </div>
+            `).join("")
+            : '<p class="no-results">You have no ads yet.</p>';
     }
 
     async function editAd(id) {
-        let username = await getUserUsername();
-        let ads = getAds();
-        let ad = (ads[username] || []).find(car => car.id === id);
+        const username = await getUserUsername();
+        const ads = getAds();
+        const ad = (ads[username] || []).find(car => car.id === id);
 
         if (!ad) {
             alert("Ad not found!");
@@ -125,48 +126,31 @@ document.addEventListener("DOMContentLoaded", async function () {
         document.getElementById("color").value = ad.color;
         document.getElementById("description").value = ad.description;
         editingAdId = id;
-        openPopup();
+        togglePopup(true)
     }
 
     async function deleteAd(id) {
-        let username = await getUserUsername();
-        let ads = getAds();
+        const username = await getUserUsername();
+        const ads = getAds();
         if (!ads[username]) return;
 
         if (confirm("Are you sure you want to delete this ad?")) {
             ads[username] = ads[username].filter(car => car.id !== id);
             saveAds(ads);
-            displayAds();
+            await displayAds();
         }
     }
 
     function togglePopup(show) {
-        let popup = document.getElementById("popup");
+        const popup = document.getElementById("popup");
         if (popup) popup.style.display = show ? "block" : "none";
-    }
-
-    function openPopup() { togglePopup(true); }
-    function closePopup() { togglePopup(false); }
-
-    function ensureCreateAdButton() {
-        let buttonContainer = document.getElementById("create-ad-container");
-        if (!buttonContainer || document.getElementById("create-ad-button")) return;
-
-        let createButton = document.createElement("button");
-        createButton.textContent = "Create Ad";
-        createButton.classList.add("btn-create-primary");
-        createButton.id = "create-ad-button";
-        createButton.onclick = openPopup;
-        buttonContainer.appendChild(createButton);
     }
 
     window.saveAd = saveAd;
     window.displayAds = displayAds;
     window.editAd = editAd;
     window.deleteAd = deleteAd;
-    window.openPopup = openPopup;
-    window.closePopup = closePopup;
+    window.togglePopup = togglePopup;
 
     await displayAds();
-    ensureCreateAdButton();
 });

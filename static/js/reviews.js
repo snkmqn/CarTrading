@@ -1,11 +1,22 @@
 let currentUserId = null;
+const token = localStorage.getItem("token");
 
 document.addEventListener("DOMContentLoaded", async () => {
     currentUserId = await getCurrentUserId();
     await loadReviews();
 });
 
-const token = localStorage.getItem("token");
+function formatDateTime(dateString) {
+    if (!dateString) return "Unknown";
+    const date = new Date(dateString);
+    return date.toLocaleString("ru-RU", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+    });
+}
 
 async function loadReviews() {
     const userId = "65f1a5c2d7e6e3b9a0b6f123";
@@ -69,8 +80,8 @@ async function addReview() {
         const response = await fetch("/api/reviews", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
             },
 
             body: JSON.stringify({
@@ -86,12 +97,10 @@ async function addReview() {
 
         if (!response.ok) throw new Error("Failed to submit review.");
 
-        const newReview = await response.json();
-
-        addReviewToUI(newReview);
+        await loadReviews();
 
         document.getElementById("review-text").value = "";
-        document.getElementById("review-rating").value = "5.0";
+        document.getElementById("review-rating").value = "";
 
     } catch (error) {
         console.error("Error adding review:", error);
@@ -127,17 +136,6 @@ async function addReviewToUI(review) {
     }
 
     const reviewElement = document.createElement("div");
-    const formatDateTime = (dateString) => {
-        if (!dateString) return "Unknown";
-        const date = new Date(dateString);
-        return date.toLocaleString("ru-RU", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-        });
-    };
     const createdAt = formatDateTime(review.createdAt);
     const updatedAt = review.updatedAt && review.updatedAt !== review.createdAt
         ? formatDateTime(review.updatedAt)
@@ -146,13 +144,11 @@ async function addReviewToUI(review) {
     reviewElement.classList.add("review");
 
     reviewElement.innerHTML = `
-        <p><strong>User:</strong> ${review.reviewerName}</p>
-        <p><strong>Rating:</strong> ⭐<span class="review-rating">${review.rating}</span></p>
-        <p class="review-text">${review.text}</p>
-        <p class="review-timestamp">
-            <strong>Created:</strong> ${createdAt} 
-            ${updatedAt ? `<br><strong>Updated:</strong> ${updatedAt}` : ""}
-        </p>    
+            <p><strong>User:</strong> <a href="${String(review.reviewerId?._id) === String(currentUserId) ? "/profile" : "/reviewExample"}">${review.reviewerName}</a></p>
+            <p><strong>Rating:</strong> ⭐<span class="review-rating">${review.rating}</span></p>
+            <p class="review-text">${review.text}</p>
+            <p class="review-timestamp"> <strong>Created:</strong> ${createdAt} 
+            ${updatedAt ? `<br><strong>Updated:</strong> ${updatedAt}` : ""}</p>    
         `;
 
     const reviewerId = review.reviewerId?._id || review.reviewerId;
@@ -180,7 +176,7 @@ async function addReviewToUI(review) {
     reviewsContainer.appendChild(reviewElement);
 }
 
-function editReview(review, reviewElement) {
+async function editReview(review, reviewElement) {
     const newText = prompt("Edit your review:", review.text);
     if (!newText) {
         alert("Review text cannot be empty.");
@@ -193,46 +189,54 @@ function editReview(review, reviewElement) {
         return;
     }
 
-    fetch(`/api/reviews/${review._id}`, {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({text: newText, rating: newRating})
-    })
-        .then(res => {
-            if (!res.ok) throw new Error("Failed to edit review");
-            return res.json();
-        })
-        .then(updatedReview => {
-            reviewElement.querySelector(".review-text").textContent = updatedReview.text;
-            reviewElement.querySelector(".review-rating").textContent = `${updatedReview.rating}`;
-            const updatedAt = new Date(updatedReview.updatedAt).toLocaleString();
-            const timestampElement = reviewElement.querySelector(".review-timestamp");
-            if (timestampElement) {
-                timestampElement.innerHTML = `<strong>Created:</strong> ${new Date(review.createdAt).toLocaleString()}<br>
-                                              <strong>Updated:</strong> ${updatedAt}`;
-            }
+    try {
+        const response = await fetch(`/api/reviews/${review._id}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({text: newText, rating: newRating})
+        });
 
-        })
-        .catch(error => console.error("Error editing review:", error));
+        if (!response.ok) {
+            throw new Error("Failed to edit review");
+        }
+
+        const updatedReview = await response.json();
+
+        reviewElement.querySelector(".review-text").textContent = updatedReview.text;
+        reviewElement.querySelector(".review-rating").textContent = `${updatedReview.rating}`;
+
+        const updatedAt = formatDateTime(updatedReview.updatedAt);
+        const timestampElement = reviewElement.querySelector(".review-timestamp");
+        if (timestampElement) {
+            timestampElement.innerHTML = `<strong>Created:</strong> ${formatDateTime(review.createdAt)}<br>
+                                          <strong>Updated:</strong> ${updatedAt}`;
+        }
+    } catch (error) {
+        console.error("Error editing review:", error);
+        alert("An error occurred while editing the review.");
+    }
 }
 
-function deleteReview(reviewId, reviewElement) {
+async function deleteReview(reviewId, reviewElement) {
     if (!confirm("Are you sure you want to delete this review?")) return;
 
-    fetch(`/api/reviews/${reviewId}`, {
-        method: "DELETE",
-        headers: {
-            "Authorization": `Bearer ${token}`
-        }
-    })
-        .then(res => {
-            if (!res.ok) throw new Error("Failed to delete review");
-            reviewElement.remove();
+    try {
+        const response = await fetch(`/api/reviews/${reviewId}`, {
+            method: "DELETE",
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
         })
-        .catch(error => console.error("Error deleting review:", error));
+
+        if (!response.ok) throw new Error("Failed to delete review");
+
+        reviewElement.remove();
+    } catch (error) {
+        console.error("Error deleting review:", error);
+    }
 }
 
 

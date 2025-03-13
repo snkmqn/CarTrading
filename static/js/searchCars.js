@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
     searchButton.addEventListener("click", async function (event) {
         event.preventDefault();
         const query = searchInput.value.trim();
-        if (!query) return alert("Please enter a car name!");
+        if (!query) return alert("Please enter a car title!");
 
         try {
             const response = await fetch(`/api/search?name=${query}`);
@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 data.forEach(car => {
                     let sellerLink = "#"
                     if (car.name === "BMW M3"){
-                        sellerLink = `/cartrading/reviewExample.html`
+                        sellerLink = `/reviewExample`
                     }
                     const carItem = `
                         <div class="car-item">

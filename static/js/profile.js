@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (!token) {
         console.error("No token found, please log in again.");
-        alert("You must log in first.");
+        alert("You must log in  first.");
         return;
     }
 
@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 "Authorization": `Bearer ${token}`,
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ gender, age })
+            body: JSON.stringify({gender, age})
         });
 
         if (response.ok) {
@@ -92,7 +92,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 "Authorization": `Bearer ${token}`,
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ newUsername })
+            body: JSON.stringify({newUsername})
         });
 
         const usernameTaken = await response.json();
@@ -107,7 +107,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 "Authorization": `Bearer ${token}`,
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ newUsername })
+            body: JSON.stringify({newUsername})
         });
 
         if (updateResponse.ok) {
@@ -129,7 +129,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("save-email-btn").addEventListener("click", async () => {
         const newEmail = document.getElementById("new-email").value;
 
-        const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+        const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9-]+(\.[a-zA-Z]{2,6}){0,2}$/
         if (!emailRegex.test(newEmail)) {
             alert("Please enter a valid email address. (example@domain.tld)");
             return;
@@ -141,7 +141,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 "Authorization": `Bearer ${token}`,
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ newEmail })
+            body: JSON.stringify({newEmail})
         });
 
         const emailTaken = await response.json();
@@ -156,7 +156,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 "Authorization": `Bearer ${token}`,
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ newEmail })
+            body: JSON.stringify({newEmail})
         });
 
         if (updateResponse.ok) {
@@ -191,7 +191,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 "Authorization": `Bearer ${token}`,
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ currentPassword })
+            body: JSON.stringify({currentPassword})
         });
 
         if (!response.ok) {
@@ -205,7 +205,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 "Authorization": `Bearer ${token}`,
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ newPassword })
+            body: JSON.stringify({newPassword})
         });
 
         if (updateResponse.ok) {

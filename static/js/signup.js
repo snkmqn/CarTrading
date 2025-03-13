@@ -12,7 +12,7 @@ document.querySelector('.signup-form').addEventListener('submit', async function
 
     let isValid = true;
 
-    isValid = validateField(username) && isValid;
+    isValid = validateUserField(username) && isValid;
     isValid = validateEmailField(email) && isValid;
     isValid = validatePasswordField(password) && isValid;
     isValid = validateConfirmPasswordField(confirmPassword, password.value) && isValid;
@@ -38,45 +38,66 @@ document.querySelector('.signup-form').addEventListener('submit', async function
         return;
     }
 
-    const response = await fetch("http://localhost:3000/api/auth/signup", {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            username: username.value.trim(),
-            email: email.value.trim(),
-            password: password.value.trim(),
-            password_confirm: confirmPassword.value.trim(),
-        })
-    });
+    try {
+        const response = await fetch("/api/auth/signup", {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                username: username.value.trim(),
+                email: email.value.trim(),
+                password: password.value.trim(),
+                password_confirm: confirmPassword.value.trim(),
+            })
+        });
 
-    if (response.ok) {
-        showMessage('Registration successful! Redirecting to login...', 'success');
-        setTimeout(() => {
-            window.location.href = "/authentication/login.html";
-        }, 2000);
-    } else {
-        const errorData = await response.json();
-        alert(errorData.message || 'Registration failed. Try again.');
+        if (response.ok) {
+            showMessage('Registration successful! Redirecting to login...', 'success');
+            setTimeout(() => {
+                window.location.href = "/authentication/login.html";
+            }, 2000);
+        } else {
+            const errorData = await response.json();
+            alert(errorData.message || 'Registration failed. Try again.');
+        }
+    } catch (error) {
+        console.error("Register error:", error);
     }
 });
 
 async function checkEmail(email) {
-    const response = await fetch(`/check-email?email=${encodeURIComponent(email)}`);
-    const data = await response.json();
-    return data.exists;
+    try {
+        const response = await fetch(`/api/check/check-email?email=${encodeURIComponent(email)}`);
+        if (!response.ok) {
+            console.error("Server error when checking email:", response.status);
+            return false;
+        }
+        const data = await response.json();
+        return data.exists;
+    } catch (error) {
+        console.error("Error checking email:", error);
+        return false;
+    }
 }
 
 async function checkUsername(username) {
-    const response = await fetch(`/check-username?username=${encodeURIComponent(username)}`);
-    const data = await response.json();
-    return data.exists;
+    try {
+        const response = await fetch(`/api/check/check-username?username=${encodeURIComponent(username)}`);
+        if (!response.ok) {
+            console.error("Server error when checking username:", response.status);
+            return false;
+        }
+        const data = await response.json();
+        return data.exists
+    } catch (error) {
+        console.error("Error checking username:", error);
+        return false;
+    }
 }
 
 function showMessage(message, type) {
     const messageContainer = document.getElementById('message-container');
     messageContainer.innerHTML = `<p class="${type}">${message}</p>`;
 }
-
 
 document.addEventListener('keydown', function (event) {
     if (event.key === 'Enter') {
@@ -87,7 +108,7 @@ document.addEventListener('keydown', function (event) {
 });
 
 document.getElementById('name').addEventListener('input', function () {
-    validateField(this);
+    validateUserField(this);
 });
 
 document.getElementById('email').addEventListener('input', function () {
@@ -104,7 +125,7 @@ document.getElementById('confirm-password').addEventListener('input', function (
 });
 
 
-function validateField(field) {
+function validateUserField(field) {
     const latinRegex = /^[A-Za-z0-9\s]+$/;
     if (field.value.trim() === '') {
         field.placeholder = "Please enter your nickname.";
@@ -144,7 +165,7 @@ function validateEmailField(email) {
 
 function validatePasswordField(password) {
     const hasNumber = /\d/;
-    const latinRegex = /^[A-Za-z0-9\s]+$/;
+    const latinRegex = /^[A-Za-z0-9_\-@.]+$/;
     if (password.value.trim() === '') {
         password.placeholder = 'Please enter your password.';
         password.classList.add('error');

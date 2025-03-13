@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
     const filterButton = document.getElementById("filterButton");
     const yearInput = document.getElementById("yearInput");
     const colorInput = document.getElementById("colorInput");
@@ -20,62 +20,54 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function applyFilters() {
-        let filteredCars = allCars;
-
         const yearFilter = yearInput.value.trim();
         const colorFilter = colorInput.value.trim().toLowerCase();
 
-        if(!yearFilter && !colorFilter) {
+        if (!yearFilter && !colorFilter) {
             return alert("Please enter at least one parameter before applying filters!")
         }
-        if (yearFilter) {
-            filteredCars = filteredCars.filter(car => String(car.year) === yearFilter);
-        }
 
-        if (colorFilter) {
-            filteredCars = filteredCars.filter(car => car.color?.toLowerCase() === colorFilter);
-        }
+        const filteredCars = allCars.filter(car =>
+            (!yearFilter || String(car.year) === yearFilter) &&
+            (!colorFilter || car.color?.toLowerCase() === colorFilter)
+        );
 
         displayCars(filteredCars);
+
         if (filteredCars.length > 0) {
-            carList.scrollIntoView({ behavior: "smooth", block: "start" });
+            carList.scrollIntoView({behavior: "smooth", block: "start"});
         }
     }
 
     function displayCars(cars) {
-        carList.innerHTML = "";
 
         if (!cars || cars.length === 0) {
-            carList.innerHTML = '<p class="no-results">No cars found</p>';
-            carList.scrollIntoView({ behavior: "smooth", block: "start" });
+            carList.innerHTML = '<p class="no-results"> No cars found </p>'
+            carList.scrollIntoView({behavior: "smooth", block: "start"});
             return;
         }
 
-        cars.forEach(car => {
-            let sellerLink = "#"
-            if (car.name === "BMW M3"){
-                sellerLink = `/cartrading/reviewExample.html`
-            }
-
-            const carItem = `
-                <div class="car-item">
-                    <img src="${car.image ? `/images/${car.image}` : '/images/default_car.jpg'}" alt="${car.name}">
-                    <h3>${car.name}</h3>
-                    <p><strong>Year:</strong> ${car.year || "N/A"}</p>
-                    <p><strong>Color:</strong> ${car.color || "N/A"}</p>
-                    <p><strong>Seller:</strong> <a href = ${sellerLink}>${car.seller || "Unknown"}</a></p>
-                    <p><strong>Rating:</strong> ⭐ ${car.rating || "N/A"}</p>
-                    <p>${car.description || "No description available"}</p>
-                    <button class="contact-button">Contact the seller</button>
-                </div>
-            `;
-            carList.innerHTML += carItem;
-        });
+        carList.innerHTML = cars.length
+            ? cars.map(car => {
+                const sellerLink = car.name === "BMW M3" ? "/reviewExample" : "#";
+                return `
+                    <div class="car-item">
+                        <img src="${car.image ? `/images/${car.image}` : '/images/default_car.jpg'}" alt="${car.name}">
+                        <h3>${car.name}</h3>
+                        <p><strong>Year:</strong> ${car.year || "N/A"}</p>
+                        <p><strong>Color:</strong> ${car.color || "N/A"}</p>
+                        <p><strong>Seller:</strong> <a href="${sellerLink}">${car.seller || "Unknown"}</a></p>
+                        <p><strong>Rating:</strong> ⭐ ${car.rating || "N/A"}</p>
+                        <p>${car.description || "No description available"}</p>
+                        <button class="contact-button">Contact the seller</button>
+                    </div>`;
+            }).join("")
+            : '<p class="no-results">No cars found</p>';
     }
 
-    fetchCars();
+    await fetchCars();
 
-    filterButton.addEventListener("click", function (event){
+    filterButton.addEventListener("click", function (event) {
         event.preventDefault();
         applyFilters();
     });
