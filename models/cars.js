@@ -7,7 +7,7 @@ const carSchema = new mongoose.Schema({
     seller: { type: String, required: true },
     rating: { type: Number, required: true, min: 0, max: 5 },
     description: { type: String, required: true },
-    image: { type: String, default: "default_car.jpg" }
+    image: { type: String, required: true }
 });
 
 const Car = mongoose.model("Car", carSchema);
