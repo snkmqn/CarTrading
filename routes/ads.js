@@ -6,56 +6,61 @@ const verifyToken = require("../middlewares/auth");
 
 router.post("/", verifyToken, async (req, res) => {
     try {
-        const { name, year, color, description, seller } = req.body;
-        const image = req.file ? `/uploads/${req.file.filename}` : "default_car.jpg";
+        const {name, year, color, description, seller} = req.body;
+        const image = req.file;
 
-        const newCar = new Car({ name, year, color, description, seller, image, rating: 5 });
+        const newCar = new Car({name, year, color, description, seller, image, rating: 5});
         await newCar.save();
 
         res.status(201).json(newCar);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: "Error creating ad" });
+        res.status(500).json({message: "Internal server error", error: error.message});
     }
 });
 
-router.get("/api/ads", verifyToken, async (req, res) => {
+router.get("/", verifyToken, async (req, res) => {
     try {
         let query = {};
         if (req.query.seller) {
             query.seller = req.query.seller;
         }
 
-        const ads = await Ad.find(query);
+        const ads = await Car.find(query);
         res.json(ads);
     } catch (error) {
-        res.status(500).json({ error: "Error fetching ads" });
+        console.error(error);
+        res.status(500).json({message: "Internal server error", error: error.message});
     }
 });
 
 router.delete("/:id", verifyToken, async (req, res) => {
     try {
-        await Car.findByIdAndDelete(req.params.id);
-        res.json({ message: "Ad deleted" });
+        const car = await Car.findByIdAndDelete(req.params.id);
+        if (!car) {
+            return res.status(404).json({error: "Car not found"});
+        }
+        res.json({message: "Ad deleted"});
     } catch (error) {
-        res.status(500).json({ error: "Error deleting ad" });
+        res.status(500).json({message: "Internal server error", error: error.message});
     }
 });
 
 router.put("/:id", verifyToken, async (req, res) => {
     try {
-        const { name, year, color, description } = req.body;
-        const image = req.file ? `/uploads/${req.file.filename}` : undefined;
+        const {name, year, color, description} = req.body;
+        const image = req.file || undefined;
 
         const updatedCar = await Car.findByIdAndUpdate(
             req.params.id,
-            { name, year, color, description, ...(image && { image }) },
-            { new: true }
+            {name, year, color, description, ...(image && {image})},
+            {new: true}
         );
 
         res.json(updatedCar);
     } catch (error) {
-        res.status(500).json({ error: "Error updating ad" });
+        console.error(error);
+        res.status(500).json({message: "Internal server error", error: error.message});
     }
 });
 

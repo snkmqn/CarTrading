@@ -4,23 +4,26 @@ const Car = require("../models/cars");
 
 router.get("/search", async (req, res) => {
     try {
-        const { name } = req.query;
+        const {name} = req.query;
         if (!name) {
-            return res.status(400).json({ message: "Please enter a car name for search." });
+            return res.status(400).json({message: "Please enter a car name for search."});
         }
 
-        const cars = await Car.find({ name: { $regex: new RegExp(name, "i") } });
+        function escapeRegex(string) {
+            return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        }
+
+        const safeName = escapeRegex(name);
+        const cars = await Car.find({name: {$regex: new RegExp(safeName, "i")}});
 
         if (cars.length === 0) {
             console.log("No cars found.");
-            return res.status(404).json({ message: "Car not found" });
+            return res.status(404).json({message: "Cars not found"});
         }
-
-        console.log(`Found ${cars.length} cars.`);
         res.json(cars);
     } catch (error) {
-        console.error("Error searching for cars:", error);
-        res.status(500).json({ message: "Server error." });
+        console.error(error);
+        res.status(500).json({message: "Internal server error", error: error.message});
     }
 });
 

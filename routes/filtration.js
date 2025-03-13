@@ -1,6 +1,5 @@
 const express = require("express");
 const Car = require("../models/cars");
-
 const router = express.Router();
 
 router.get("/all", async (req, res) => {
@@ -11,7 +10,7 @@ router.get("/all", async (req, res) => {
         }
         res.json(cars);
     } catch (error) {
-        res.status(500).json({ message: "Server error", error });
+        res.status(500).json({message: "Internal server error", error: error.message});
     }
 });
 

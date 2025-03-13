@@ -13,7 +13,8 @@ router.get("/me", verifyToken, async (req, res) => {
         }
         res.json({userId: user._id, username: user.username, email: user.email, gender: user.gender, age: user.age});
     } catch (error) {
-        res.status(500).json({message: "Server error"});
+        console.error(error)
+        res.status(500).json({message: "Internal server error", error: error.message});
     }
 });
 
@@ -30,19 +31,15 @@ router.put("/update", verifyToken, async (req, res) => {
             return res.status(404).json({message: "User not found"});
         }
 
-        if (gender) {
-            user.gender = gender;
-        }
-        if (age) {
-            user.age = age;
-        }
+        if (gender) user.gender = gender;
+        if (age) user.age = age;
 
         await user.save();
 
         res.json({message: "User information updated successfully!"});
     } catch (error) {
         console.error("Error updating user:", error);
-        res.status(500).json({message: "Server error"});
+        res.status(500).json({message: "Internal server error", error: error.message});
     }
 });
 
@@ -69,7 +66,8 @@ router.put("/change-name", verifyToken, async (req, res) => {
 
         res.json({message: "Name updated successfully!"});
     } catch (error) {
-        res.status(500).json({message: "Server error"});
+        console.error(error)
+        res.status(500).json({message: "Internal server error", error: error.message});
     }
 });
 
@@ -96,7 +94,8 @@ router.put("/change-email", verifyToken, async (req, res) => {
 
         res.json({message: "Email updated successfully!"});
     } catch (error) {
-        res.status(500).json({message: "Server error"});
+        console.error(error)
+        res.status(500).json({message: "Internal server error", error: error.message});
     }
 });
 
@@ -115,8 +114,8 @@ router.post("/check-current-password", verifyToken, async (req, res) => {
         }
 
         return res.status(200).json({message: "Password is correct"});
-    } catch (err) {
-        console.error(err);
+    } catch (error) {
+        console.error(error);
         return res.status(500).json({error: "Internal server error"});
     }
 });
@@ -140,7 +139,8 @@ router.put("/change-password", verifyToken, async (req, res) => {
 
         res.json({message: "Password updated successfully!"});
     } catch (error) {
-        res.status(500).json({message: "Server error"});
+        console.error(error)
+        res.status(500).json({message: "Internal server error", error: error.message});
     }
 });
 

@@ -15,7 +15,7 @@ router.get('/check-email', async (req, res) => {
         }
     } catch (error) {
         console.error("Error checking email:", error);
-        res.status(500).json({ exists: false, message: "Server error" });
+        res.status(500).json({message: "Internal server error", error: error.message});
     }
 });
 
