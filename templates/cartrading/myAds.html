@@ -11,17 +11,10 @@
 <header>
     <nav class="navbar">
         <div class="navbar-left">
-            <div class="logo"><p><a href="withlogout.html">CarTrading</a></p></div>
+            <div class="logo"><p><a href="/index">CarTrading</a></p></div>
         </div>
         <div id="auth-container">
             <ul class="nav-links">
-                <li><a href="#">My Ads</a></li>
-                <li><a href="/templates/cartrading/profile.html">My Profile</a></li>
-                <li>
-                    <button type="button" onclick="location.href='/templates/index.html'" class="btn btn-primary">Log
-                        Out
-                    </button>
-                </li>
             </ul>
         </div>
     </nav>
@@ -30,10 +23,9 @@
 <main>
     <section class="ads-container">
         <h2>My Ads</h2>
-        <button type="button" onclick="openPopup()" class="btn-create-primary">Create Ad</button>
+        <button type="button" onclick="togglePopup(true)" class="btn-create-primary">Create Ad</button>
         <div id="my-ads-list"></div>
         <div id="ads-list" class="ads-list">
-            <p id="no-ads-text">No ads available</p>
         </div>
     </section>
 </main>
@@ -59,11 +51,12 @@
 
         <div class="form-buttons">
             <button type="button" class="btn" onclick="saveAd()">Save</button>
-            <button type="button" class="btn" onclick="closePopup()">Cancel</button>
+            <button type="button" class="btn" onclick="togglePopup(false)">Cancel</button>
         </div>
     </form>
 </div>
 
+<script src="/js/login.js"></script>
 <script src="/js/ads.js"></script>
 </body>
 </html>
